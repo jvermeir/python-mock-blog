@@ -13,7 +13,7 @@ agree. In my defense I was just experimenting and things got out of hand. Ok, so
 
 So I tried to apply Durga's solution to my setup and was confused by the results. In my case the mocks were ignored. Struggling for a while just added to the confusion and frustration, so I took a step back and reduced the problem to the bare minimum. 
 
-My first version is below. Note that the code is spread across three files, which is essential. The name of the files is in comments in the code. (TODO link to rep) 
+My first version is below. Note that the code is spread across three files, which is essential. The name of the files is in comments in the code, [you can find the sources here](https://github.com/jvermeir/python-mock-blog/) 
 
 ```python
 # service.py
@@ -36,7 +36,7 @@ def test_my_service(mocker):
 
 So my assumption was that `mocker.patch('repository.my_repository', return_value=False)` in `test/test_service.py` would replace the `my_repository()` method with a constant `False` instead of `True`. But that didn't happen, the test failed. Argh! 
 
-What's the difference with Durga's version? In that example there's the test code calling a function that calls another function which is mocked in the test. Exactly like I was doing, right? Not exactly as it turns out. The difference is that in my case the code is spread across three files, a service and repository file and a test file. While in Durga's blog the service and repository code are in the same file. This makes a difference for how the mock works. 
+What's the difference with Durga's version? In that example, the test code calls a function that calls another function which is mocked in the test. Exactly like I was doing, right? Not exactly as it turns out. The difference is that in my case the code is spread across three files, a service and repository file and a test file. While in Durga's blog the service and repository code are in the same file. This makes a difference for how the mock works. 
 
 To validate the one-file assumption I put the service and repository code in a single file, like this:
 
