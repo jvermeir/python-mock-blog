@@ -5,7 +5,7 @@ The blog shows how to use pytest-mock to replace a function with a test version.
 code that calls a database or an external service. The solution relies on the option in python to replace a definition 
 with a new version within the scope of a function. 
 
-This works, so I wanted to apply the solution to my own code. My code follows a service/repository setup. I started
+This looked good, so I wanted to apply the solution to my own code. My code follows a service/repository setup. I started
 with simple SQL queries and added filtering and other decisions based on data. So, initially I could just mock the 
 database in my tests, but later I wanted to test the logic that was executed on the result set. So I figured I 
 should split the code in a part that handles queries and a part that manipulates data. Duh, you'll say and I would 
@@ -13,7 +13,7 @@ agree. In my defense I was just experimenting and things got out of hand. Ok, so
 
 So I tried to apply Durga's solution to my setup and was confused by the results. In my case the mocks were ignored. Struggling for a while just added to the confusion and frustration, so I took a step back and reduced the problem to the bare minimum. 
 
-My first version is below. Note that the code is spread across three files, which is essential. The name of the files is in comments in the code, [you can find the sources here](https://github.com/jvermeir/python-mock-blog/) 
+My first version is below. Note that the code is spread across three files, which is essential. The name of the files is in comments in the code snippets, [you can find the sources here](https://github.com/jvermeir/python-mock-blog/) 
 
 ```python
 # service.py
@@ -82,13 +82,13 @@ mocker.patch('service.my_repository', return_value=False)
 
 So now I'm replacing the `my_repository` function in `service.py` instead of in `repository.py`. 
 
-What actually happens is that python creates a map of functions and variables when executing code. So once service.py is parsed, it's map of functions contains a reference to my_repository in repository.py. In my first implementation I was replacing `repository.my_repository` but that doesn't actually exist when the test runs. `service.my_repository` does exist so that's the reference that needs patching. 
+You can see a module as a map (dictionary). What happens is that by importing `my_repository` in the service module, it adds the function to the service module. This function is named `service.my_repository`. Changing `repository.my_repository`does not change the contents of the service module. Hence, when I run the tests, I actually execute `service.my_repository` instead of `repository.my_repository`.
 
 There is one alternative that might make things a little  more obvious:
 
 ```python
 # service_v5.py
-import repository  # <--------------------------------------------------------------- this is the magic incantation
+import repository  # <--------------------------------------------------------------- this is the magic incantation...
 def my_service():
     print('my_service - calling my_repository')
     return repository.my_repository()
@@ -101,15 +101,19 @@ def my_repository():
 # test/test_service_v5.py
 from service_v5 import my_service
 def test_my_service(mocker):
-    mocker.patch('repository.my_repository', return_value=False) # <------------------ so we can do this
+    mocker.patch('repository.my_repository', return_value=False) # <------------------ ...so we can do this
     assert my_service() == False
 ```
 
-In this case, service_v5.py calls `import repository`, and then it calls `return repository.my_repository()`. So now we can do `mocker.patch('repository.my_repository', return_value=False)` because then we're replacing `repository.my_repository`, a key in our code map that does exist. 
+In this case, service_v5.py calls `import repository`, and then it calls `return repository.my_repository()`. So now we can do `mocker.patch('repository.my_repository', return_value=False)` because now we have `repository.my_repository` as key in our code map. 
 
 ## Summary
 
 So it's easy to mock the wrong thing. I hope this helps. 
+
+## Credits
+
+I'm indebted to my colleague [Arjan Molenaar](https://www.linkedin.com/in/arjanmolenaar/) for explaining how python handles mocking. 
 
 
 ## Install
