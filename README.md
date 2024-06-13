@@ -10,4 +10,4 @@ pip3 install -r requirements.txt
 
 ## Blog
 
-see [blog text](../python-mocking-the-sneaky-bits)
+see [blog text](https://github.com/jvermeir/python-mock-blog/blob/main/python-mocking-the-sneaky-bits/index.md)
